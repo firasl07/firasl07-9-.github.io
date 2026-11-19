@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PIXEL PAY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--g:#39ff14;--k:#000;--w:#fff;--d:#0b1f09;--m:#7dbb6f}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--k);color:var(--w);font-family:'VT323',ui-monospace,Consolas,monospace;font-size:22px;line-height:1.25}
+body{min-height:100vh;background-image:linear-gradient(rgba(57,255,20,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(57,255,20,.05) 1px,transparent 1px);background-size:24px 24px}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);z-index:50}
+.px{font-family:'Press Start 2P','Courier New',monospace;letter-spacing:0}
+#app{max-width:560px;margin:0 auto;padding:14px 14px 28px}
+.demo{background:var(--g);color:var(--k);text-align:center;padding:8px 6px;font-size:11px;line-height:1.5;border:3px solid var(--w);margin-bottom:16px;animation:blink 2.4s steps(1) infinite}
+@keyframes blink{50%{background:var(--w)}}
+.view{display:none}.view.on{display:block;animation:pop .25s steps(4)}
+@keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.panel{background:var(--d);border:4px solid var(--g);box-shadow:6px 6px 0 var(--g);padding:18px;margin-bottom:18px}
+h1{font-size:clamp(26px,9vw,44px);color:var(--g);text-shadow:4px 4px 0 var(--w);text-align:center;margin:14px 0 6px}
+h2{font-size:15px;color:var(--g);margin-bottom:14px;line-height:1.6}
+.sub{text-align:center;color:var(--w);margin-bottom:18px}
+.cur::after{content:"_";animation:cur 1s steps(1) infinite}
+@keyframes cur{50%{opacity:0}}
+.hero{display:flex;justify-content:center;gap:26px;margin:18px 0 22px}
+.hero svg{width:min(34vw,140px);height:auto;shape-rendering:crispEdges;animation:bob 1.6s steps(2) infinite}
+.hero svg:last-child{animation-delay:.8s}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.btn{display:block;width:100%;font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5;color:var(--k);background:var(--g);border:4px solid var(--w);padding:14px 10px;margin:12px 0;cursor:pointer;box-shadow:5px 5px 0 var(--w);transition:transform .08s steps(2),box-shadow .08s steps(2);text-align:center}
+.btn:hover{background:var(--w);box-shadow:5px 5px 0 var(--g)}
+.btn:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--w)}
+.btn:focus-visible,input:focus-visible,.m:focus-within{outline:4px dashed var(--w);outline-offset:3px}
+.btn.alt{background:var(--k);color:var(--g);border-color:var(--g);box-shadow:5px 5px 0 var(--g)}
+.btn.alt:hover{background:var(--g);color:var(--k);box-shadow:5px 5px 0 var(--w)}
+.btn.alt:active{box-shadow:0 0 0 var(--g)}
+.btn.big{font-size:15px;padding:18px 10px;animation:pulse 1.4s steps(2) infinite}
+@keyframes pulse{50%{box-shadow:5px 5px 0 var(--g)}}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:420px){.row{grid-template-columns:1fr}}
+label{display:block;color:var(--g);margin:10px 0 4px}
+input[type=text],input[type=number]{width:100%;background:var(--k);color:var(--w);border:3px solid var(--g);padding:10px;font-family:'VT323',monospace;font-size:26px;border-radius:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{font-family:'Press Start 2P',monospace;font-size:10px;background:var(--k);color:var(--g);border:3px solid var(--g);padding:9px 10px;cursor:pointer}
+.chip:hover{background:var(--g);color:var(--k)}
+.err{color:var(--k);background:var(--w);padding:6px 10px;margin-top:10px;display:none;border-left:8px solid var(--g)}
+.qrbox{background:var(--w);padding:14px;width:fit-content;margin:16px auto 8px;border:4px solid var(--g);box-shadow:6px 6px 0 var(--w)}
+.qrbox img,.qrbox canvas{display:block;image-rendering:pixelated;max-width:100%;height:auto}
+.info{text-align:center;margin-top:12px}.info b{color:var(--g);font-weight:normal}
+.big-amt{font-family:'Press Start 2P',monospace;font-size:clamp(18px,6vw,26px);color:var(--g);text-align:center;margin:10px 0}
+.m{display:flex;align-items:center;gap:12px;border:3px solid var(--g);padding:12px;margin:10px 0;cursor:pointer;background:var(--k)}
+.m input{accent-color:var(--g);width:22px;height:22px}
+.m.sel{background:var(--g);color:var(--k)}
+.m small{display:block;font-size:18px;opacity:.85}
+.load{display:none;text-align:center}
+.bar{display:flex;gap:4px;margin:18px 0}
+.bar i{flex:1;height:22px;border:2px solid var(--g);background:var(--k)}
+.bar i.f{background:var(--g)}
+.coin{width:56px;height:56px;margin:0 auto;background:var(--g);border:4px solid var(--w);animation:spin .8s steps(4) infinite}
+@keyframes spin{25%{transform:scaleX(.6)}50%{transform:scaleX(.2)}75%{transform:scaleX(.6)}}
+.ok{text-align:center;font-size:clamp(14px,4.5vw,20px);color:var(--k);background:var(--g);border:4px solid var(--w);padding:16px 8px;margin-bottom:16px;line-height:1.6;animation:flash .5s steps(2) 4}
+@keyframes flash{50%{background:var(--w)}}
+.receipt{background:var(--w);color:var(--k);padding:16px;border:4px solid var(--g);box-shadow:6px 6px 0 var(--g);font-size:24px;position:relative;margin-bottom:18px}
+.receipt::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:10px;background:linear-gradient(135deg,var(--w) 50%,transparent 50%) 0 0/16px 10px,linear-gradient(225deg,var(--w) 50%,transparent 50%) 0 0/16px 10px}
+.receipt h3{font-family:'Press Start 2P',monospace;font-size:14px;text-align:center;margin-bottom:6px}
+.receipt .tag{text-align:center;background:var(--k);color:var(--g);font-size:18px;padding:3px;margin-bottom:10px}
+.receipt hr{border:0;border-top:3px dashed var(--k);margin:10px 0}
+.rl{display:flex;justify-content:space-between;gap:10px}.rl span:last-child{text-align:right;word-break:break-all}
+.hi{border:3px solid var(--g);padding:10px;margin:10px 0;background:var(--k)}
+.hi .rl:first-child{color:var(--g)}
+.empty{text-align:center;color:var(--m);padding:16px}
+@media print{body{background:#fff}body::after,.demo,.btn,.ok,.noprint{display:none!important}.view{display:none!important}#v-pay.on{display:block!important}#v-pay>*:not(.printzone){display:none!important}.receipt{box-shadow:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="demo px">DEMO SAHAJA – BUKAN PEMBAYARAN SEBENAR</div>
+
+  <!-- HALAMAN UTAMA -->
+  <section class="view on" id="v-home">
+    <h1 class="px">PIXEL PAY</h1>
+    <p class="sub cur">Simulasi bayaran QR gaya arked</p>
+    <div class="hero" aria-hidden="true">
+      <svg viewBox="0 0 14 14"><g fill="#39ff14"><path d="M0 0h5v5H0zM9 0h5v5H9zM0 9h5v5H0z"/><path d="M6 6h2v2H6zM10 9h2v2h-2zM12 12h2v2h-2zM9 12h2v2H9zM6 10h2v2H6z"/></g><g fill="#000"><path d="M1 1h3v3H1zM10 1h3v3h-3zM1 10h3v3H1z"/></g><g fill="#fff"><path d="M2 2h1v1H2zM11 2h1v1h-1zM2 11h1v1H2z"/></g></svg>
+      <svg viewBox="0 0 14 14"><g fill="#fff"><path d="M1 3h12v1H1zM1 3h1v10H1zM12 3h1v10h-1zM1 12h12v1H1z"/></g><g fill="#39ff14"><path d="M2 4h10v8H2z"/><path d="M3 1h8v2H3z" opacity=".6"/></g><g fill="#000"><path d="M9 6h4v4H9z"/></g><g fill="#fff"><path d="M10 7h2v2h-2z"/></g></svg>
+    </div>
+    <button class="btn big" data-go="qr">MULA PEMBAYARAN</button>
+    <button class="btn alt" data-go="hist">SEJARAH TRANSAKSI</button>
+  </section>
+
+  <!-- HALAMAN QR -->
+  <section class="view" id="v-qr">
+    <div class="panel">
+      <h2 class="px">QR CODE BAYARAN</h2>
+      <label for="nama">Nama penerima</label>
+      <input type="text" id="nama" maxlength="30" value="Kedai Piksel" autocomplete="off">
+      <label for="jumlah">Jumlah (RM)</label>
+      <input type="number" id="jumlah" min="0.01" max="10000" step="0.01" value="10.00" inputmode="decimal">
+      <div class="chips" role="group" aria-label="Jumlah pantas">
+        <button class="chip" data-amt="5">RM5</button><button class="chip" data-amt="10">RM10</button><button class="chip" data-amt="25">RM25</button><button class="chip" data-amt="50">RM50</button>
+      </div>
+      <div class="err" id="err" role="alert"></div>
+      <button class="btn" id="btnGen">JANA QR CODE</button>
+    </div>
+    <div class="panel" id="qrPanel" style="display:none">
+      <div class="qrbox" id="qrcode"></div>
+      <div class="info"><div>Penerima: <b id="qN"></b></div><div class="big-amt" id="qA"></div><div>Rujukan: <b id="qR"></b></div></div>
+      <button class="btn" data-go="pay">TERUSKAN KE BAYARAN</button>
+    </div>
+    <button class="btn alt" data-go="home">KEMBALI KE UTAMA</button>
+  </section>
+
+  <!-- SIMULASI PEMBAYARAN -->
+  <section class="view" id="v-pay">
+    <div id="payForm">
+      <div class="panel">
+        <h2 class="px">PILIH KAEDAH</h2>
+        <div class="info" style="margin:0 0 8px">Bayar kepada <b id="pN"></b></div>
+        <div class="big-amt" id="pA"></div>
+        <label class="m sel"><input type="radio" name="kaedah" value="DuitNow QR" checked><span>DuitNow QR<small>Imbas &amp; bayar (simulasi)</small></span></label>
+        <label class="m"><input type="radio" name="kaedah" value="E-Wallet"><span>E-Wallet<small>Dompet digital (simulasi)</small></span></label>
+        <label class="m"><input type="radio" name="kaedah" value="Perbankan Dalam Talian"><span>Perbankan Dalam Talian<small>FPX palsu (simulasi)</small></span></label>
+        <button class="btn big" id="btnPay">BAYAR SEKARANG</button>
+      </div>
+      <button class="btn alt" data-go="qr">KEMBALI KE QR</button>
+      <button class="btn alt" data-go="home">KEMBALI KE UTAMA</button>
+    </div>
+    <div class="panel load" id="loading">
+      <div class="coin"></div>
+      <h2 class="px" style="margin:18px 0 0">MEMPROSES...</h2>
+      <div class="bar" id="bar"></div>
+      <div id="loadTxt">Menghubungi pelayan simulasi</div>
+    </div>
+    <div id="done" style="display:none">
+      <div class="ok px noprint">PEMBAYARAN BERJAYA!</div>
+      <div class="printzone"><div class="receipt" id="receipt"></div></div>
+      <div class="row noprint">
+        <button class="btn" id="btnPrint">CETAK RESIT</button>
+        <button class="btn" id="btnSave">SIMPAN .TXT</button>
+      </div>
+      <button class="btn alt noprint" data-go="qr" data-new="1">QR CODE BAHARU</button>
+      <div class="row noprint">
+        <button class="btn alt" data-go="hist">SEJARAH</button>
+        <button class="btn alt" data-go="home">UTAMA</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEJARAH -->
+  <section class="view" id="v-hist">
+    <div class="panel">
+      <h2 class="px">SEJARAH (SIMULASI)</h2>
+      <div id="histList"></div>
+      <button class="btn alt" id="btnClear">PADAM SEJARAH</button>
+    </div>
+    <button class="btn" data-go="qr" data-new="1">QR CODE BAHARU</button>
+    <button class="btn alt" data-go="home">KEMBALI KE UTAMA</button>
+  </section>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var state={nama:"",amt:0,ref:""},last=null,mem=[];
+  var KEY="pixelpay_demo_history";
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function rm(n){return "RM "+Number(n).toFixed(2)}
+  function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(Array.isArray(d))return d}catch(e){}return mem}
+  function save(a){mem=a;try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}}
+
+  function show(id){
+    document.querySelectorAll(".view").forEach(function(v){v.classList.remove("on")});
+    $("v-"+id).classList.add("on");
+    if(id==="hist")renderHist();
+    if(id==="pay")resetPay();
+    window.scrollTo(0,0);
+  }
+
+  document.querySelectorAll("[data-go]").forEach(function(b){
+    b.addEventListener("click",function(){
+      if(b.dataset["new"]){$("qrPanel").style.display="none";$("err").style.display="none"}
+      show(b.dataset.go);
+    });
+  });
+
+  /* QR */
+  function err(m){var e=$("err");e.textContent=m;e.style.display=m?"block":"none"}
+  function genQR(){
+    var nama=$("nama").value.trim(),amt=parseFloat($("jumlah").value);
+    if(!nama){err("Sila masukkan nama penerima.");return}
+    if(!(amt>0)||amt>10000){err("Jumlah mesti antara RM0.01 dan RM10,000.");return}
+    err("");
+    amt=Math.round(amt*100)/100;
+    state.nama=nama;state.amt=amt;
+    state.ref="REF"+Math.random().toString(36).slice(2,8).toUpperCase();
+    var text="PIXELPAY-DEMO|"+nama+"|"+amt.toFixed(2)+"|"+state.ref+"|BUKAN-PEMBAYARAN-SEBENAR";
+    var box=$("qrcode");box.innerHTML="";
+    if(typeof QRCode==="undefined"){box.innerHTML='<div style="color:#000;padding:20px;font-size:20px">Pustaka QR gagal dimuat. Semak sambungan internet.</div>'}
+    else{new QRCode(box,{text:text,width:220,height:220,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M})}
+    $("qN").textContent=nama;$("qA").textContent=rm(amt);$("qR").textContent=state.ref;
+    $("qrPanel").style.display="block";
+    $("qrPanel").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  $("btnGen").addEventListener("click",genQR);
+  document.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){$("jumlah").value=Number(c.dataset.amt).toFixed(2)})});
+
+  /* Bayaran */
+  document.querySelectorAll(".m input").forEach(function(r){
+    r.addEventListener("change",function(){
+      document.querySelectorAll(".m").forEach(function(m){m.classList.toggle("sel",m.querySelector("input").checked)});
+    });
+  });
+  function resetPay(){
+    $("payForm").style.display="block";$("loading").style.display="none";$("done").style.display="none";
+    $("pN").textContent=state.nama||"-";$("pA").textContent=rm(state.amt||0);
+  }
+  var timer;
+  $("btnPay").addEventListener("click",function(){
+    if(!(state.amt>0)){show("qr");err("Jana QR Code dahulu.");return}
+    var kaedah=document.querySelector('input[name="kaedah"]:checked').value;
+    $("payForm").style.display="none";$("loading").style.display="block";
+    var bar=$("bar");bar.innerHTML="";for(var i=0;i<10;i++)bar.appendChild(document.createElement("i"));
+    var msgs=["Menghubungi pelayan simulasi","Mengesahkan "+kaedah,"Memproses jumlah","Menjana resit"];
+    var n=0;clearInterval(timer);
+    timer=setInterval(function(){
+      n++;
+      var cells=bar.children;for(var j=0;j<n&&j<10;j++)cells[j].className="f";
+      $("loadTxt").textContent=msgs[Math.min(3,Math.floor(n/3))]+"...";
+      if(n>=10){clearInterval(timer);finish(kaedah)}
+    },300);
+  });
+  function two(n){return String(n).padStart(2,"0")}
+  function finish(kaedah){
+    var d=new Date();
+    var tarikh=two(d.getDate())+"/"+two(d.getMonth()+1)+"/"+d.getFullYear();
+    var masa=two(d.getHours())+":"+two(d.getMinutes())+":"+two(d.getSeconds());
+    var id="PXP"+d.getFullYear()+two(d.getMonth()+1)+two(d.getDate())+"-"+Math.floor(10000+Math.random()*90000);
+    last={id:id,nama:state.nama,amt:state.amt,kaedah:kaedah,tarikh:tarikh,masa:masa};
+    var h=load().slice();h.unshift(last);save(h.slice(0,50));
+    $("receipt").innerHTML='<h3>PIXEL PAY</h3><div class="tag">DEMO SAHAJA – BUKAN PEMBAYARAN SEBENAR</div><div class="rl"><span>Resit</span><span>DIGITAL</span></div><hr>'+
+      row("Penerima",esc(last.nama))+row("Kaedah",esc(kaedah))+row("Tarikh",tarikh)+row("Masa",masa)+row("No. Transaksi",id)+'<hr>'+
+      '<div class="rl" style="font-size:30px"><span>JUMLAH</span><span>'+rm(last.amt)+'</span></div><hr><div style="text-align:center">Status: BERJAYA (SIMULASI)<br>Terima kasih!</div>';
+    $("loading").style.display="none";$("done").style.display="block";
+  }
+  function row(a,b){return '<div class="rl"><span>'+a+'</span><span>'+b+'</span></div>'}
+
+  /* Cetak / simpan */
+  $("btnPrint").addEventListener("click",function(){try{window.print()}catch(e){alert("Cetak tidak tersedia. Guna butang SIMPAN .TXT.")}});
+  $("btnSave").addEventListener("click",function(){
+    if(!last)return;
+    var t=["PIXEL PAY - RESIT DIGITAL","DEMO SAHAJA - BUKAN PEMBAYARAN SEBENAR","------------------------------",
+      "Penerima     : "+last.nama,"Kaedah      : "+last.kaedah,"Tarikh       : "+last.tarikh,"Masa         : "+last.masa,
+      "No. Transaksi: "+last.id,"JUMLAH       : "+rm(last.amt),"Status       : BERJAYA (SIMULASI)"].join("\r\n");
+    try{
+      var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/plain"}));
+      a.download="resit-"+last.id+".txt";document.body.appendChild(a);a.click();a.remove();
+    }catch(e){alert("Muat turun disekat. Guna butang CETAK RESIT dan pilih 'Save as PDF'.")}
+  });
+
+  /* Sejarah */
+  function renderHist(){
+    var h=load(),el=$("histList");
+    if(!h.length){el.innerHTML='<div class="empty">Belum ada transaksi simulasi.<br>Tekan QR CODE BAHARU untuk mula.</div>';return}
+    el.innerHTML=h.map(function(t){
+      return '<div class="hi">'+row(esc(t.nama),rm(t.amt))+row(esc(t.kaedah),esc(t.tarikh)+" "+esc(t.masa))+'<div style="color:var(--m);word-break:break-all">'+esc(t.id)+'</div></div>';
+    }).join("");
+  }
+  $("btnClear").addEventListener("click",function(){if(confirm("Padam semua sejarah simulasi?")){save([]);renderHist()}});
+})();
+</script>
+</body>
+</html>
